@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LocalMemo 离线浮墨</title>
-<!-- PWA核心配置 -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#2D6A4F">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,10 +15,9 @@
   padding: 0;
   box-sizing: border-box;
 }
-/* 全局配色完全对齐flomo绿系风格 */
 :root {
   --flomo-primary: #2D6A4F;
-  --flomo-primary-dark: #1B4332;
+  --flomo-primary-dark: #1B4333;
   --flomo-light-bg: #E8F3EE;
   --flomo-page-bg: #F8F9F6;
   --flomo-card-bg: #FFFFFF;
@@ -39,13 +37,22 @@ body {
   padding: 20px;
   line-height: 1.6;
 }
+
+.fade-in {
+  animation: fadeIn 0.25s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 .header h1 {
   font-size: 22px;
@@ -54,11 +61,11 @@ body {
 }
 .btn-group {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .btn {
-  padding: 6px 12px;
+  padding: 6px 10px;
   border: 1px solid #E5E7EB;
   border-radius: 6px;
   background: var(--flomo-card-bg);
@@ -79,20 +86,47 @@ body {
 }
 .btn-primary:hover {
   background: var(--flomo-primary-dark);
-  color: white;
 }
-.btn-danger {
-  border-color: #FECACA;
-  color: var(--flomo-danger);
+
+.tab-bar {
+  display: flex;
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 16px;
+  box-shadow: var(--flomo-shadow);
 }
-.btn-danger:hover {
-  background: #FEE2E2;
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--flomo-text-secondary);
+  transition: all 0.2s ease;
 }
+.tab-item.active {
+  background: var(--flomo-primary);
+  color: #fff;
+}
+.tab-item:hover:not(.active) {
+  background: var(--flomo-light-bg);
+  color: var(--flomo-primary);
+}
+
+.page {
+  display: none;
+}
+.page.active {
+  display: block;
+}
+
 .input-card {
   background: var(--flomo-card-bg);
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   box-shadow: var(--flomo-shadow);
 }
 #content {
@@ -138,11 +172,12 @@ body {
 #submit:hover {
   background: var(--flomo-primary-dark);
 }
+
 .tags-cloud {
-  margin-bottom: 20px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 16px;
 }
 .tag {
   padding: 4px 10px;
@@ -157,87 +192,125 @@ body {
   background: var(--flomo-primary);
   color: #fff;
 }
-.tag:hover:not(.active) {
-  background: #D8EDE4;
-}
-.memo-list {
+
+.memo-list, .todo-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
-.memo-item {
+.memo-item, .todo-item {
   background: var(--flomo-card-bg);
   border-radius: 12px;
-  padding: 16px;
+  padding: 14px;
   box-shadow: var(--flomo-shadow);
-  transition: box-shadow 0.2s ease;
+  transition: all 0.22s ease;
 }
-.memo-item:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+.memo-item:hover, .todo-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
 }
 .memo-time {
   font-size: 12px;
   color: var(--flomo-text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .memo-content {
   font-size: 15px;
   margin-bottom: 10px;
   word-break: break-word;
-  color: var(--flomo-text-main);
 }
-/* 段落与引用块样式 */
 .memo-content p {
-  margin: 0 0 8px 0;
-}
-.memo-content p:last-child {
-  margin-bottom: 0;
+  margin: 0 0 6px 0;
 }
 .memo-content blockquote {
   border-left: 3px solid var(--flomo-primary);
   background: var(--flomo-light-bg);
-  padding: 8px 12px;
-  margin: 8px 0;
+  padding: 6px 10px;
+  margin: 6px 0;
   border-radius: 4px;
   color: var(--flomo-text-secondary);
-}
-.memo-content blockquote p {
-  margin: 0 0 4px 0;
-  font-size: 14px;
-}
-.memo-content blockquote p:last-child {
-  margin-bottom: 0;
 }
 .memo-content .tag-span {
   color: var(--flomo-primary);
   font-weight: 500;
 }
-.memo-actions {
+
+.todo-hd {
   display: flex;
-  gap: 16px;
-  font-size: 12px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
 }
-.memo-actions span {
+.todo-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--flomo-primary);
+  cursor: pointer;
+}
+.todo-tag {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #FEF3C7;
+  color: #92400E;
+}
+.todo-item.done .todo-tag {
+  background: #D1FAE5;
+  color: #065F46;
+}
+.todo-title {
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.todo-item.done .todo-title {
+  text-decoration: line-through;
+  color: var(--flomo-text-secondary);
+}
+
+/* 处理记录样式 */
+.handle-record {
+  background: #F9FAFB;
+  border-left: 2px solid var(--flomo-primary);
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #374151;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+.handle-time {
+  color: var(--flomo-text-secondary);
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.memo-actions, .todo-actions {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+.memo-actions span, .todo-actions span {
   color: var(--flomo-text-secondary);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
 }
-.memo-actions span:hover {
+.memo-actions span:hover, .todo-actions span:hover {
   color: var(--flomo-primary);
 }
+span.del {
+  color: var(--flomo-danger) !important;
+}
+
 .empty {
   text-align: center;
   color: var(--flomo-text-placeholder);
-  padding: 60px 0;
+  padding: 50px 0;
   font-size: 14px;
 }
-/* 同步设置弹窗 */
+
 .modal-mask {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top:0;left:0;right:0;bottom:0;
   background: rgba(0,0,0,0.5);
   display: none;
   justify-content: center;
@@ -249,18 +322,18 @@ body {
   display: flex;
 }
 .modal-card {
-  background: var(--flomo-card-bg);
+  background: #fff;
   border-radius: 12px;
   width: 100%;
   max-width: 500px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .modal-header h3 {
   font-size: 18px;
@@ -268,292 +341,230 @@ body {
   color: var(--flomo-primary);
 }
 .modal-close {
-  cursor: pointer;
   font-size: 20px;
+  cursor: pointer;
   color: var(--flomo-text-secondary);
-  line-height: 1;
-}
-.modal-close:hover {
-  color: var(--flomo-text-main);
 }
 .form-item {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .form-item label {
   display: block;
   font-size: 14px;
-  color: var(--flomo-text-main);
   margin-bottom: 6px;
 }
-.form-item input {
+.form-item input,
+.form-item textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid #E5E7EB;
   border-radius: 6px;
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s ease;
 }
-.form-item input:focus {
-  border-color: var(--flomo-primary);
-}
-.form-tips {
-  font-size: 12px;
-  color: var(--flomo-text-secondary);
-  margin-top: 4px;
-  line-height: 1.4;
+.form-item textarea {
+  min-height: 100px;
+  resize: vertical;
 }
 .modal-footer {
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
-  margin-top: 24px;
-}
-/* 冲突弹窗 */
-.conflict-actions {
-  display: flex;
   gap: 10px;
   margin-top: 20px;
-  flex-wrap: wrap;
-}
-.conflict-text {
-  font-size: 14px;
-  color: var(--flomo-text-main);
-  margin-bottom: 10px;
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>LocalMemo 离线浮墨</h1>
+  <h1>LocalMemo</h1>
   <div class="btn-group">
-    <button class="btn" id="syncBtn">云同步设置</button>
-    <button class="btn" id="export">导出备份</button>
-    <button class="btn" id="import">导入备份</button>
-    <button class="btn" id="cancelEdit" style="display: none;">取消编辑</button>
+    <button class="btn" id="syncBtn">云同步</button>
+    <button class="btn" id="export">导出</button>
+    <button class="btn" id="import">导入</button>
+    <button class="btn" id="cancelEdit" style="display:none;">取消</button>
   </div>
 </div>
 
-<div class="input-card">
-<textarea id="content" placeholder="写下此刻的想法，用 #标签 自动分类，点击笔记的「引用」按钮可续写…"></textarea>
-<div class="submit-wrap">
-  <div class="sync-status" id="syncStatus">未开启云同步</div>
-  <button id="submit">保存笔记</button>
-</div>
+<div class="tab-bar">
+  <div class="tab-item active" data-page="memo">📝 笔记</div>
+  <div class="tab-item" data-page="todo">☑ 待办</div>
 </div>
 
-<div class="tags-cloud" id="tagsCloud"></div>
-<div class="memo-list" id="memoList"></div>
+<div id="memoPage" class="page active fade-in">
+  <div class="input-card">
+    <textarea id="content" placeholder="记录想法、灵感、总结，#标签 自动分类"></textarea>
+    <div class="submit-wrap">
+      <div class="sync-status" id="syncStatus">未开启云同步</div>
+      <button id="submit">保存笔记</button>
+    </div>
+  </div>
+  <div class="tags-cloud" id="tagsCloud"></div>
+  <div class="memo-list" id="memoList"></div>
+</div>
 
-<!-- 同步设置弹窗 -->
+<div id="todoPage" class="page fade-in">
+  <div class="input-card">
+    <div style="margin-bottom:10px;font-weight:500;">新增待办</div>
+    <input type="text" id="todoTitle" placeholder="输入待办事项…" style="margin-bottom:8px;width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;outline:0;">
+    <div style="text-align:right;margin-top:10px;">
+      <button id="addTodo" class="btn btn-primary">保存待办</button>
+    </div>
+  </div>
+  <div class="todo-list" id="todoList"></div>
+</div>
+
+<!-- 处理待办弹窗 -->
+<div class="modal-mask" id="handleTodoModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>处理进度</h3>
+      <span class="modal-close" id="closeHandleModal">×</span>
+    </div>
+    <div class="form-item">
+      <label>本次处理内容</label>
+      <textarea id="handleContent" placeholder="输入本次处理进展…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="cancelHandle">取消</button>
+      <button class="btn btn-primary" id="saveHandle">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 同步弹窗 -->
 <div class="modal-mask" id="syncModal">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>云同步设置（GitHub Gist）</h3>
+      <h3>云同步设置</h3>
       <span class="modal-close" id="modalClose">×</span>
     </div>
     <div class="form-item">
-      <label>GitHub Personal Access Token</label>
-      <input type="password" id="githubToken" placeholder="请输入仅开启gist权限的Token">
-      <p class="form-tips">Token仅存在本地浏览器，不会上传到任何服务器，最小权限仅勾选gist即可</p>
+      <label>GitHub Token</label>
+      <input type="password" id="githubToken" placeholder="ghp_...">
     </div>
     <div class="form-item">
       <label>Gist ID</label>
-      <input type="text" id="gistId" placeholder="请输入用于同步的Gist ID">
-      <p class="form-tips">需创建Secret私密Gist，文件名建议为localmemo_sync.json</p>
+      <input type="text" id="gistId">
     </div>
     <div class="modal-footer">
-      <button class="btn" id="clearSyncConfig">清空配置</button>
-      <button class="btn btn-primary" id="saveSyncConfig">保存并开启同步</button>
-    </div>
-  </div>
-</div>
-
-<!-- 冲突处理弹窗 -->
-<div class="modal-mask" id="conflictModal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>数据冲突提醒</h3>
-    </div>
-    <p class="conflict-text">检测到云端和本地数据均有更新，存在冲突，请选择要保留的版本：</p>
-    <div class="conflict-actions">
-      <button class="btn" id="keepLocal">保留本地版本（覆盖云端）</button>
-      <button class="btn btn-primary" id="keepCloud">保留云端版本（覆盖本地）</button>
+      <button class="btn" id="clearSyncConfig">清空</button>
+      <button class="btn btn-primary" id="saveSyncConfig">保存</button>
     </div>
   </div>
 </div>
 
 <script>
-// 核心存储Key
 const STORAGE_KEY = 'localmemo_flomo_data';
 const SYNC_CONFIG_KEY = 'localmemo_sync_config';
 const LAST_SYNC_TIME_KEY = 'localmemo_last_sync_time';
 
-// 全局状态
 let currentTag = '';
 let editId = null;
-let syncLock = false; // 同步锁，避免重复请求
-let syncConfig = {
-  token: '',
-  gistId: ''
-};
+let syncLock = false;
+let currentHandleTodoId = null;
+let syncConfig = { token: '', gistId: '' };
 
-// ========== 新增：内容格式化核心函数（处理引用块、标签、XSS转义） ==========
-function formatContent(content) {
-  // 第一步：HTML转义，防止XSS攻击
-  let escaped = content
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-  
-  // 第二步：按行处理，转换引用块与段落
-  const lines = escaped.split('\n');
-  let html = '';
-  let inBlockquote = false;
-  
-  lines.forEach(line => {
-    const isQuoteLine = line.trimStart().startsWith('&gt;'); // 匹配转义后的>开头的引用行
+// Tab 切换
+document.querySelectorAll('.tab-item').forEach(el => {
+  el.onclick = () => {
+    document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    const page = el.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(page + 'Page').classList.add('active');
+  };
+});
 
-    if (isQuoteLine) {
-      if (!inBlockquote) {
-        html += '<blockquote>';
-        inBlockquote = true;
-      }
-      // 移除引用标记，保留内容
-      const lineContent = line.replace(/^&gt;\s?/, '');
-      html += `<p>${lineContent}</p>`;
-    } else {
-      if (inBlockquote) {
-        html += '</blockquote>';
-        inBlockquote = false;
-      }
-      // 普通行：非空内容加段落标签，空行加换行
-      html += line.trim() !== '' ? `<p>${line}</p>` : '<br>';
-    }
-  });
-
-  // 处理末尾未闭合的引用块
-  if (inBlockquote) html += '</blockquote>';
-
-  // 第三步：标签高亮处理
-  html = html.replace(/#([^\s#<>&]+)/g, '<span class="tag-span">#$1</span>');
-
-  return html;
-}
-
-// ========== 新增：引用功能核心函数 ==========
-function quoteMemo(id) {
-  const list = loadData();
-  const targetMemo = list.find(item => item.id === id);
-  if (!targetMemo) return;
-
-  // 重置编辑状态，避免冲突
-  editId = null;
-  document.getElementById('submit').textContent = '保存笔记';
-  document.getElementById('cancelEdit').style.display = 'none';
-
-  // 生成带溯源信息的引用内容，标准markdown格式
-  const quoteHeader = `> 【引用自 ${targetMemo.createdAt}】\n`;
-  const quoteContent = targetMemo.content.split('\n').map(line => `> ${line}`).join('\n');
-  const fullContent = quoteHeader + quoteContent + '\n\n';
-
-  // 回填到输入框，自动聚焦并滚动到顶部
-  const contentInput = document.getElementById('content');
-  contentInput.value = fullContent;
-  contentInput.focus();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ========== 原有核心功能（完全保留兼容） ==========
-// 加载本地数据
+// 数据
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
   return raw ? JSON.parse(raw) : [];
 }
-
-// 保存数据到本地
 function saveData(list) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-// 提交/更新笔记
-function submitMemo() {
-  const content = document.getElementById('content').value.trim();
-  if (!content) return;
-  
-  const list = loadData();
-  const now = new Date();
-  const timeStr = now.toLocaleString('zh-CN');
-  const tagMatch = content.match(/#([^\s#]+)/g) || [];
-  const tags = tagMatch.map(t => t.slice(1));
-
-  // 编辑模式：更新原有笔记
-  if (editId) {
-    const index = list.findIndex(item => item.id === editId);
-    if (index !== -1) {
-      list[index].content = content;
-      list[index].tags = tags;
-      list[index].updatedAt = timeStr;
+// 渲染笔记内容
+function formatContent(content) {
+  let esc = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const lines = esc.split('\n');
+  let html = '';
+  let inQuote = false;
+  lines.forEach(line => {
+    const isQ = line.trimStart().startsWith('&gt;');
+    if (isQ) {
+      if (!inQuote) { html += '<blockquote>'; inQuote = true; }
+      html += `<p>${line.replace(/^&gt;\s?/, '')}</p>`;
+    } else {
+      if (inQuote) { html += '</blockquote>'; inQuote = false; }
+      html += line.trim() ? `<p>${line}</p>` : '<br>';
     }
-    // 重置编辑状态
+  });
+  if (inQuote) html += '</blockquote>';
+  return html.replace(/#([^\s#<>&]+)/g, '<span class="tag-span">#$1</span>');
+}
+
+// 笔记操作
+function submitMemo() {
+  const c = document.getElementById('content').value.trim();
+  if (!c) return;
+  const list = loadData();
+  const now = new Date().toLocaleString('zh-CN');
+  const tags = (c.match(/#([^\s#]+)/g) || []).map(t => t.slice(1));
+  if (editId) {
+    const i = list.findIndex(x => x.id === editId);
+    if (i !== -1) {
+      list[i].content = c;
+      list[i].tags = tags;
+      list[i].updatedAt = now;
+    }
     editId = null;
     document.getElementById('submit').textContent = '保存笔记';
     document.getElementById('cancelEdit').style.display = 'none';
   } else {
-    // 新增模式：创建新笔记
-    const item = {
-      id: Date.now(),
-      content,
-      tags,
-      createdAt: timeStr,
-      updatedAt: timeStr
-    };
-    list.unshift(item);
+    list.unshift({ id: Date.now(), content: c, tags, createdAt: now, updatedAt: now, type: 'memo' });
   }
-
   saveData(list);
   document.getElementById('content').value = '';
-  document.getElementById('content').focus();
-  render();
-  // 保存后自动同步到云端
+  renderAll();
   autoSyncToCloud();
 }
 
-// 编辑笔记：回填内容到输入框
 function editMemo(id) {
   const list = loadData();
   const item = list.find(x => x.id === id);
   if (!item) return;
-  
   editId = id;
   document.getElementById('content').value = item.content;
   document.getElementById('content').focus();
   document.getElementById('submit').textContent = '更新笔记';
   document.getElementById('cancelEdit').style.display = 'inline-block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.querySelector('.tab-item[data-page="memo"]').click();
 }
 
-// 删除笔记
+function quoteMemo(id) {
+  const list = loadData();
+  const m = list.find(x => x.id === id);
+  if (!m) return;
+  editId = null;
+  document.getElementById('submit').textContent = '保存笔记';
+  document.getElementById('cancelEdit').style.display = 'none';
+  const q = `> 引用 ${m.createdAt}\n` + m.content.split('\n').map(l => `> ${l}`).join('\n') + '\n\n';
+  document.getElementById('content').value = q;
+  document.getElementById('content').focus();
+  document.querySelector('.tab-item[data-page="memo"]').click();
+}
+
 function deleteMemo(id) {
-  if (!confirm('确定要删除这条笔记吗？')) return;
-  let list = loadData();
-  list = list.filter(x => x.id !== id);
+  if (!confirm('确定删除？')) return;
+  let list = loadData().filter(x => x.id !== id);
   saveData(list);
-  // 如果删除的是正在编辑的笔记，重置编辑状态
-  if (editId === id) {
-    editId = null;
-    document.getElementById('content').value = '';
-    document.getElementById('submit').textContent = '保存笔记';
-    document.getElementById('cancelEdit').style.display = 'none';
-  }
-  render();
-  // 删除后自动同步到云端
+  if (editId === id) { editId = null; document.getElementById('content').value = ''; }
+  renderAll();
   autoSyncToCloud();
 }
 
-// 取消编辑
 function cancelEdit() {
   editId = null;
   document.getElementById('content').value = '';
@@ -561,422 +572,285 @@ function cancelEdit() {
   document.getElementById('cancelEdit').style.display = 'none';
 }
 
-// 渲染标签云
-function renderTags() {
+// 待办操作
+function addTodo() {
+  const title = document.getElementById('todoTitle').value.trim();
+  if (!title) { alert('请输入待办'); return; }
   const list = loadData();
-  const tagCount = {};
-  list.forEach(item => {
-    item.tags.forEach(t => {
-      tagCount[t] = (tagCount[t] || 0) + 1;
-    });
+  list.unshift({
+    id: Date.now(),
+    type: 'todo',
+    title,
+    records: [],
+    done: false,
+    createdAt: new Date().toLocaleString('zh-CN')
   });
+  saveData(list);
+  document.getElementById('todoTitle').value = '';
+  renderAll();
+  autoSyncToCloud();
+}
 
+function toggleTodo(id) {
+  const list = loadData();
+  const t = list.find(x => x.id === id);
+  if (t) { t.done = !t.done; saveData(list); renderAll(); autoSyncToCloud(); }
+}
+
+// 打开处理弹窗
+function openHandleTodo(id) {
+  currentHandleTodoId = id;
+  document.getElementById('handleContent').value = '';
+  document.getElementById('handleTodoModal').classList.add('show');
+}
+
+// 关闭处理弹窗
+function closeHandleTodo() {
+  document.getElementById('handleTodoModal').classList.remove('show');
+  currentHandleTodoId = null;
+}
+
+// 保存处理记录（追加模式）
+function saveHandleTodo() {
+  if (!currentHandleTodoId) return;
+  const content = document.getElementById('handleContent').value.trim();
+  if (!content) { alert('请输入处理内容'); return; }
+
+  const list = loadData();
+  const item = list.find(x => x.id === currentHandleTodoId);
+  if (item) {
+    const now = new Date().toLocaleString('zh-CN');
+    if (!item.records) item.records = [];
+    item.records.push({
+      time: now,
+      content: content
+    });
+    saveData(list);
+    renderAll();
+    autoSyncToCloud();
+  }
+  closeHandleTodo();
+}
+
+function deleteTodo(id) {
+  if (!confirm('删除该待办？')) return;
+  const list = loadData().filter(x => x.id !== id);
+  saveData(list);
+  renderAll();
+  autoSyncToCloud();
+}
+
+// 渲染
+function renderTags() {
+  const list = loadData().filter(x => x.type === 'memo');
+  const map = {};
+  list.forEach(i => i.tags?.forEach(t => map[t] = (map[t] || 0) + 1));
   const cloud = document.getElementById('tagsCloud');
   cloud.innerHTML = '';
-
-  // 全部标签按钮
-  const allTag = document.createElement('span');
-  allTag.className = 'tag' + (currentTag === '' ? ' active' : '');
-  allTag.textContent = '全部笔记';
-  allTag.onclick = () => { currentTag = ''; render(); };
-  cloud.appendChild(allTag);
-
-  // 生成所有标签
-  Object.keys(tagCount).sort().forEach(tag => {
-    const tagEl = document.createElement('span');
-    tagEl.className = 'tag' + (currentTag === tag ? ' active' : '');
-    tagEl.textContent = `${tag} (${tagCount[tag]})`;
-    tagEl.onclick = () => { currentTag = tag; render(); };
-    cloud.appendChild(tagEl);
+  const all = document.createElement('span');
+  all.className = 'tag' + (currentTag === '' ? ' active' : '');
+  all.textContent = '全部';
+  all.onclick = () => { currentTag = ''; renderAll(); };
+  cloud.appendChild(all);
+  Object.keys(map).sort().forEach(t => {
+    const e = document.createElement('span');
+    e.className = 'tag' + (currentTag === t ? ' active' : '');
+    e.textContent = `${t}(${map[t]})`;
+    e.onclick = () => { currentTag = t; renderAll(); };
+    cloud.appendChild(e);
   });
 }
 
-// 渲染笔记列表
-function renderList() {
-  const list = loadData();
-  const container = document.getElementById('memoList');
-  container.innerHTML = '';
-
-  // 按标签筛选
-  let filteredList = list;
-  if (currentTag) {
-    filteredList = list.filter(item => item.tags.includes(currentTag));
-  }
-
-  // 空状态
-  if (filteredList.length === 0) {
-    container.innerHTML = '<div class="empty">暂无笔记，写下你的第一条想法吧</div>';
-    return;
-  }
-
-  // 渲染单条笔记
-  filteredList.forEach(item => {
-    const memoEl = document.createElement('div');
-    memoEl.className = 'memo-item';
-    
-    // 时间显示（优先显示更新时间）
-    const timeText = item.updatedAt !== item.createdAt 
-      ? `${item.createdAt}（更新于 ${item.updatedAt}）` 
-      : item.createdAt;
-    
-    // 内容格式化：处理引用块、标签高亮
-    const formatHtml = formatContent(item.content);
-
-    // 新增引用按钮，放在编辑与删除之间
-    memoEl.innerHTML = `
-      <div class="memo-time">${timeText}</div>
-      <div class="memo-content">${formatHtml}</div>
+function renderMemo() {
+  const list = loadData().filter(x => x.type === 'memo');
+  const el = document.getElementById('memoList');
+  el.innerHTML = '';
+  let f = list;
+  if (currentTag) f = f.filter(i => i.tags?.includes(currentTag));
+  if (f.length === 0) { el.innerHTML = '<div class="empty">暂无笔记</div>'; return; }
+  f.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'memo-item';
+    const time = item.updatedAt !== item.createdAt ? `${item.createdAt}（更新${item.updatedAt}）` : item.createdAt;
+    d.innerHTML = `
+      <div class="memo-time">${time}</div>
+      <div class="memo-content">${formatContent(item.content)}</div>
       <div class="memo-actions">
         <span onclick="editMemo(${item.id})">编辑</span>
         <span onclick="quoteMemo(${item.id})">引用</span>
-        <span onclick="deleteMemo(${item.id})">删除</span>
+        <span class="del" onclick="deleteMemo(${item.id})">删除</span>
       </div>
     `;
-    container.appendChild(memoEl);
+    el.appendChild(d);
   });
 }
 
-// 统一渲染入口
-function render() {
-  renderTags();
-  renderList();
-}
-
-// 导出备份
-function exportData() {
-  const data = localStorage.getItem(STORAGE_KEY) || '[]';
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `LocalMemo备份_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// 导入备份
-function importData() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (Array.isArray(data)) {
-          saveData(data);
-          render();
-          alert('备份导入成功！');
-          // 导入后自动同步到云端
-          autoSyncToCloud();
-        } else {
-          alert('备份格式错误，请选择正确的LocalMemo备份文件');
-        }
-      } catch (err) {
-        alert('文件解析失败，请检查文件是否损坏');
-      }
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-// 快捷键：Ctrl+Enter / Cmd+Enter 快速提交
-document.getElementById('content').addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    e.preventDefault();
-    submitMemo();
-  }
-});
-
-// ========== 云同步核心功能（完全保留兼容） ==========
-// 加载同步配置
-function loadSyncConfig() {
-  const raw = localStorage.getItem(SYNC_CONFIG_KEY);
-  if (raw) {
-    try {
-      syncConfig = JSON.parse(raw);
-      updateSyncStatus('已开启云同步', 'success');
-      return true;
-    } catch (e) {
-      syncConfig = { token: '', gistId: '' };
+function renderTodo() {
+  const list = loadData().filter(x => x.type === 'todo');
+  const el = document.getElementById('todoList');
+  el.innerHTML = '';
+  if (list.length === 0) { el.innerHTML = '<div class="empty">暂无待办</div>'; return; }
+  list.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'todo-item' + (t.done ? ' done' : '');
+    let recordsHtml = '';
+    if (t.records && t.records.length > 0) {
+      t.records.forEach(r => {
+        recordsHtml += `
+          <div class="handle-record">
+            <span class="handle-time">${r.time}</span>
+            ${r.content}
+          </div>
+        `;
+      });
     }
-  }
-  updateSyncStatus('未开启云同步', '');
+    d.innerHTML = `
+      <div class="todo-hd">
+        <input type="checkbox" class="todo-checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${t.id})">
+        <div class="todo-tag">${t.done ? '已完成' : '待处理'}</div>
+      </div>
+      <div class="todo-title">${t.title}</div>
+      ${recordsHtml}
+      <div class="todo-actions">
+        <span onclick="openHandleTodo(${t.id})">处理</span>
+        <span class="del" onclick="deleteTodo(${t.id})">删除</span>
+      </div>
+    `;
+    el.appendChild(d);
+  });
+}
+
+function renderAll() {
+  renderTags();
+  renderMemo();
+  renderTodo();
+}
+
+// 导出导入
+function exportData() {
+  const d = localStorage.getItem(STORAGE_KEY) || '[]';
+  const blob = new Blob([d], { type: 'application/json' });
+  const u = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = u;
+  a.download = `LocalMemo_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(u);
+}
+function importData() {
+  const i = document.createElement('input');
+  i.type = 'file'; i.accept = '.json';
+  i.onchange = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        if (Array.isArray(d)) { saveData(d); renderAll(); alert('导入成功'); autoSyncToCloud(); }
+      } catch(e) { alert('格式错误'); }
+    };
+    r.readAsText(f);
+  };
+  i.click();
+}
+
+// 同步
+function loadSyncConfig() {
+  const r = localStorage.getItem(SYNC_CONFIG_KEY);
+  if (r) { try { syncConfig = JSON.parse(r); upStatus('已同步', 'success'); return true; } catch(e) {} }
+  syncConfig = { token: '', gistId: '' }; upStatus('未同步', '');
   return false;
 }
-
-// 保存同步配置
-function saveSyncConfig() {
-  const token = document.getElementById('githubToken').value.trim();
-  const gistId = document.getElementById('gistId').value.trim();
-  
-  if (!token || !gistId) {
-    alert('请填写完整的Token和Gist ID');
-    return;
-  }
-
-  syncConfig = { token, gistId };
-  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
-  closeSyncModal();
-  updateSyncStatus('同步配置已保存，正在连接...', 'success');
-  
-  // 保存后立即拉取云端数据
-  syncFromCloud();
+function upStatus(t, c) {
+  const e = document.getElementById('syncStatus');
+  e.textContent = t;
+  e.className = 'sync-status ' + c;
 }
-
-// 清空同步配置
-function clearSyncConfig() {
-  if (!confirm('确定要清空同步配置吗？清空后将关闭云同步功能')) return;
-  syncConfig = { token: '', gistId: '' };
-  localStorage.removeItem(SYNC_CONFIG_KEY);
-  localStorage.removeItem(LAST_SYNC_TIME_KEY);
-  document.getElementById('githubToken').value = '';
-  document.getElementById('gistId').value = '';
-  closeSyncModal();
-  updateSyncStatus('未开启云同步', '');
-}
-
-// 更新同步状态显示
-function updateSyncStatus(text, type = '') {
-  const statusEl = document.getElementById('syncStatus');
-  statusEl.textContent = text;
-  statusEl.className = 'sync-status ' + type;
-}
-
-// 从云端拉取数据
-async function fetchCloudData() {
-  if (!syncConfig.token || !syncConfig.gistId) return null;
-  
-  try {
-    const response = await fetch(`https://api.github.com/gists/${syncConfig.gistId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `token ${syncConfig.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'LocalMemo'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`请求失败: ${response.status}`);
-    }
-
-    const gistData = await response.json();
-    // 获取第一个文件的内容
-    const fileName = Object.keys(gistData.files)[0];
-    const fileContent = gistData.files[fileName].content;
-    const syncData = JSON.parse(fileContent);
-    
-    return {
-      data: Array.isArray(syncData.data) ? syncData.data : [],
-      updatedAt: gistData.updated_at,
-      fileName
-    };
-  } catch (e) {
-    console.error('拉取云端数据失败', e);
-    updateSyncStatus(`同步失败: ${e.message}`, 'error');
-    return null;
-  }
-}
-
-// 上传数据到云端
-async function uploadToCloud(data) {
-  if (!syncConfig.token || !syncConfig.gistId || syncLock) return false;
-  
-  syncLock = true;
-  updateSyncStatus('正在同步到云端...', 'success');
-  
-  try {
-    const cloudInfo = await fetchCloudData();
-    if (!cloudInfo) {
-      syncLock = false;
-      return false;
-    }
-
-    const syncData = {
-      data: data,
-      lastSync: new Date().toISOString()
-    };
-
-    const response = await fetch(`https://api.github.com/gists/${syncConfig.gistId}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `token ${syncConfig.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'LocalMemo'
-      },
-      body: JSON.stringify({
-        files: {
-          [cloudInfo.fileName]: {
-            content: JSON.stringify(syncData, null, 2)
-          }
-        }
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`上传失败: ${response.status}`);
-    }
-
-    const now = new Date().toISOString();
-    localStorage.setItem(LAST_SYNC_TIME_KEY, now);
-    updateSyncStatus(`最后同步: ${new Date().toLocaleString('zh-CN')}`, 'success');
-    syncLock = false;
-    return true;
-  } catch (e) {
-    console.error('上传云端数据失败', e);
-    updateSyncStatus(`同步失败: ${e.message}`, 'error');
-    syncLock = false;
-    return false;
-  }
-}
-
-// 冲突检测与处理
-async function checkConflict(cloudUpdatedAt) {
-  const lastSyncTime = localStorage.getItem(LAST_SYNC_TIME_KEY);
-  // 第一次同步，无冲突
-  if (!lastSyncTime) return false;
-  
-  // 云端更新时间晚于最后一次同步时间，说明云端有更新
-  const cloudIsNewer = new Date(cloudUpdatedAt) > new Date(lastSyncTime);
-  // 本地数据更新时间晚于最后一次同步时间，说明本地有更新
-  const localData = loadData();
-  const localLastUpdate = localData.length > 0 
-    ? new Date(localData[0].updatedAt).toISOString() 
-    : new Date(0).toISOString();
-  const localIsNewer = new Date(localLastUpdate) > new Date(lastSyncTime);
-
-  // 两边都有更新，存在冲突
-  return cloudIsNewer && localIsNewer;
-}
-
-// 从云端同步到本地
 async function syncFromCloud() {
   if (!loadSyncConfig() || syncLock) return;
-  
-  syncLock = true;
-  updateSyncStatus('正在拉取云端数据...', 'success');
-  
-  const cloudResult = await fetchCloudData();
-  if (!cloudResult) {
-    syncLock = false;
-    return;
-  }
-
-  // 检测冲突
-  const hasConflict = await checkConflict(cloudResult.updatedAt);
-  if (hasConflict) {
-    syncLock = false;
-    showConflictModal(cloudResult.data);
-    return;
-  }
-
-  // 无冲突，直接用云端数据覆盖本地
-  saveData(cloudResult.data);
-  const now = new Date().toISOString();
-  localStorage.setItem(LAST_SYNC_TIME_KEY, now);
-  updateSyncStatus(`最后同步: ${new Date().toLocaleString('zh-CN')}`, 'success');
-  render();
+  syncLock = true; upStatus('拉取中…', 'success');
+  try {
+    const res = await fetch(`https://api.github.com/gists/${syncConfig.gistId}`, {
+      headers: { Authorization: `token ${syncConfig.token}`, 'User-Agent': 'LocalMemo' }
+    });
+    if (!res.ok) throw new Error(res.status);
+    const g = await res.json();
+    const file = g.files[Object.keys(g.files)[0]];
+    const data = JSON.parse(file.content).data || [];
+    saveData(data);
+    localStorage.setItem(LAST_SYNC_TIME_KEY, new Date().toISOString());
+    upStatus(`已同步`, 'success');
+    renderAll();
+  } catch (e) { upStatus('同步失败', 'error'); }
+  syncLock = false;
+}
+async function autoSyncToCloud() {
+  if (!loadSyncConfig()) return;
+  syncLock = true; upStatus('同步中…', 'success');
+  try {
+    const g = await fetch(`https://api.github.com/gists/${syncConfig.gistId}`);
+    const data = await g.json();
+    const fn = Object.keys(data.files)[0];
+    await fetch(`https://api.github.com/gists/${syncConfig.gistId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `token ${syncConfig.token}` },
+      body: JSON.stringify({ files: { [fn]: { content: JSON.stringify({ data: loadData() }, null, 2) } } })
+    });
+    upStatus('已同步', 'success');
+  } catch (e) { upStatus('同步失败', 'error'); }
   syncLock = false;
 }
 
-// 自动同步到云端（操作后触发）
-async function autoSyncToCloud() {
-  if (!loadSyncConfig()) return;
-  const localData = loadData();
-  await uploadToCloud(localData);
-}
+// 绑定
+document.getElementById('submit').onclick = submitMemo;
+document.getElementById('cancelEdit').onclick = cancelEdit;
+document.getElementById('export').onclick = exportData;
+document.getElementById('import').onclick = importData;
+document.getElementById('addTodo').onclick = addTodo;
 
-// 冲突弹窗相关
-function showConflictModal(cloudData) {
-  const modal = document.getElementById('conflictModal');
-  modal.classList.add('show');
+document.getElementById('closeHandleModal').onclick = closeHandleTodo;
+document.getElementById('cancelHandle').onclick = closeHandleTodo;
+document.getElementById('saveHandle').onclick = saveHandleTodo;
 
-  // 保留本地
-  document.getElementById('keepLocal').onclick = async () => {
-    const localData = loadData();
-    await uploadToCloud(localData);
-    modal.classList.remove('show');
-  };
-
-  // 保留云端
-  document.getElementById('keepCloud').onclick = () => {
-    saveData(cloudData);
-    const now = new Date().toISOString();
-    localStorage.setItem(LAST_SYNC_TIME_KEY, now);
-    render();
-    updateSyncStatus(`最后同步: ${new Date().toLocaleString('zh-CN')}`, 'success');
-    modal.classList.remove('show');
-    syncLock = false;
-  };
-}
-
-// 同步设置弹窗相关
-function openSyncModal() {
+document.getElementById('syncBtn').onclick = () => {
   loadSyncConfig();
   document.getElementById('githubToken').value = syncConfig.token;
   document.getElementById('gistId').value = syncConfig.gistId;
   document.getElementById('syncModal').classList.add('show');
-}
-
-function closeSyncModal() {
+};
+document.getElementById('modalClose').onclick = () => {
   document.getElementById('syncModal').classList.remove('show');
-}
-
-// ========== PWA核心注册（完全保留兼容） ==========
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registration => {
-        console.log('LocalMemo PWA 注册成功', registration);
-      })
-      .catch(err => {
-        console.log('LocalMemo PWA 注册失败', err);
-      });
-  });
-}
-
-// ========== 事件绑定与初始化 ==========
-// 原有功能事件绑定
-document.getElementById('submit').onclick = submitMemo;
-document.getElementById('export').onclick = exportData;
-document.getElementById('import').onclick = importData;
-document.getElementById('cancelEdit').onclick = cancelEdit;
-
-// 同步功能事件绑定
-document.getElementById('syncBtn').onclick = openSyncModal;
-document.getElementById('modalClose').onclick = closeSyncModal;
-document.getElementById('saveSyncConfig').onclick = saveSyncConfig;
-document.getElementById('clearSyncConfig').onclick = clearSyncConfig;
-
-// 点击弹窗遮罩关闭
-document.getElementById('syncModal').onclick = (e) => {
-  if (e.target === document.getElementById('syncModal')) closeSyncModal();
+};
+document.getElementById('saveSyncConfig').onclick = () => {
+  const tk = document.getElementById('githubToken').value.trim();
+  const gi = document.getElementById('gistId').value.trim();
+  if (!tk || !gi) { alert('填写完整'); return; }
+  syncConfig = { token: tk, gistId: gi };
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
+  document.getElementById('syncModal').classList.remove('show');
+  syncFromCloud();
+};
+document.getElementById('clearSyncConfig').onclick = () => {
+  if (!confirm('清空？')) return;
+  localStorage.removeItem(SYNC_CONFIG_KEY);
+  localStorage.removeItem(LAST_SYNC_TIME_KEY);
+  document.getElementById('syncModal').classList.remove('show');
+  loadSyncConfig();
 };
 
-// 页面获得焦点时，自动检查云端更新
-window.addEventListener('focus', () => {
-  if (loadSyncConfig()) {
-    syncFromCloud();
-  }
+// 回车
+document.getElementById('content').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); submitMemo(); }
+});
+document.getElementById('todoTitle').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addTodo(); }
 });
 
-// 页面加载初始化
+// 启动
 window.onload = () => {
-  loadSyncConfig();
-  render();
-  // 开启同步的话，页面加载自动拉取云端数据
-  if (syncConfig.token && syncConfig.gistId) {
-    syncFromCloud();
-    // 每5分钟自动同步一次
-    setInterval(() => {
-      syncFromCloud();
-    }, 5 * 60 * 1000);
-  }
+  renderAll();
+  if (loadSyncConfig()) syncFromCloud();
 };
 </script>
 </body>
