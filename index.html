@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LocalMemo - 离线浮墨</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* 全局配色完全对齐flomo绿系风格 */
+:root {
+  --flomo-primary: #2D6A4F;
+  --flomo-primary-dark: #1B4332;
+  --flomo-light-bg: #E8F3EE;
+  --flomo-page-bg: #F8F9F6;
+  --flomo-card-bg: #FFFFFF;
+  --flomo-text-main: #1F2937;
+  --flomo-text-secondary: #6B7280;
+  --flomo-text-placeholder: #9CA3AF;
+  --flomo-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--flomo-page-bg);
+  color: var(--flomo-text-main);
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px;
+  line-height: 1.6;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--flomo-primary);
+}
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  padding: 6px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  background: var(--flomo-card-bg);
+  color: var(--flomo-text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  background: var(--flomo-light-bg);
+  color: var(--flomo-primary);
+  border-color: var(--flomo-light-bg);
+}
+.input-card {
+  background: var(--flomo-card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: var(--flomo-shadow);
+}
+#content {
+  width: 100%;
+  min-height: 80px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  resize: vertical;
+  background: transparent;
+  color: var(--flomo-text-main);
+  line-height: 1.6;
+}
+#content::placeholder {
+  color: var(--flomo-text-placeholder);
+}
+.submit-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+#submit {
+  padding: 8px 20px;
+  background: var(--flomo-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+#submit:hover {
+  background: var(--flomo-primary-dark);
+}
+.tags-cloud {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag {
+  padding: 4px 10px;
+  background: var(--flomo-light-bg);
+  color: var(--flomo-primary);
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tag.active {
+  background: var(--flomo-primary);
+  color: #fff;
+}
+.tag:hover:not(.active) {
+  background: #D8EDE4;
+}
+.memo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.memo-item {
+  background: var(--flomo-card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--flomo-shadow);
+  transition: box-shadow 0.2s ease;
+}
+.memo-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.memo-time {
+  font-size: 12px;
+  color: var(--flomo-text-secondary);
+  margin-bottom: 8px;
+}
+.memo-content {
+  font-size: 15px;
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--flomo-text-main);
+}
+.memo-content .tag-span {
+  color: var(--flomo-primary);
+  font-weight: 500;
+}
+.memo-actions {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+}
+.memo-actions span {
+  color: var(--flomo-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.memo-actions span:hover {
+  color: var(--flomo-primary);
+}
+.empty {
+  text-align: center;
+  color: var(--flomo-text-placeholder);
+  padding: 60px 0;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LocalMemo 离线浮墨</h1>
+  <div class="btn-group">
+    <button class="btn" id="export">导出备份</button>
+    <button class="btn" id="import">导入备份</button>
+    <button class="btn" id="cancelEdit" style="display: none;">取消编辑</button>
+  </div>
+</div>
+
+<div class="input-card">
+<textarea id="content" placeholder="写下此刻的想法，用 #标签 自动分类…"></textarea>
+<div class="submit-wrap">
+  <button id="submit">保存笔记</button>
+</div>
+</div>
+
+<div class="tags-cloud" id="tagsCloud"></div>
+<div class="memo-list" id="memoList"></div>
+
+<script>
+const STORAGE_KEY = 'localmemo_flomo_data';
+let currentTag = '';
+let editId = null; // 编辑状态标记
+
+// 加载本地数据
+function loadData() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+// 保存数据到本地
+function saveData(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+// 提交/更新笔记
+function submitMemo() {
+  const content = document.getElementById('content').value.trim();
+  if (!content) return;
+  
+  const list = loadData();
+  const now = new Date();
+  const timeStr = now.toLocaleString('zh-CN');
+  const tagMatch = content.match(/#([^\s#]+)/g) || [];
+  const tags = tagMatch.map(t => t.slice(1));
+
+  // 编辑模式：更新原有笔记
+  if (editId) {
+    const index = list.findIndex(item => item.id === editId);
+    if (index !== -1) {
+      list[index].content = content;
+      list[index].tags = tags;
+      list[index].updatedAt = timeStr;
+    }
+    // 重置编辑状态
+    editId = null;
+    document.getElementById('submit').textContent = '保存笔记';
+    document.getElementById('cancelEdit').style.display = 'none';
+  } else {
+    // 新增模式：创建新笔记
+    const item = {
+      id: Date.now(),
+      content,
+      tags,
+      createdAt: timeStr,
+      updatedAt: timeStr
+    };
+    list.unshift(item);
+  }
+
+  saveData(list);
+  document.getElementById('content').value = '';
+  document.getElementById('content').focus();
+  render();
+}
+
+// 编辑笔记：回填内容到输入框
+function editMemo(id) {
+  const list = loadData();
+  const item = list.find(x => x.id === id);
+  if (!item) return;
+  
+  editId = id;
+  document.getElementById('content').value = item.content;
+  document.getElementById('content').focus();
+  document.getElementById('submit').textContent = '更新笔记';
+  document.getElementById('cancelEdit').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 删除笔记
+function deleteMemo(id) {
+  if (!confirm('确定要删除这条笔记吗？')) return;
+  let list = loadData();
+  list = list.filter(x => x.id !== id);
+  saveData(list);
+  // 如果删除的是正在编辑的笔记，重置编辑状态
+  if (editId === id) {
+    editId = null;
+    document.getElementById('content').value = '';
+    document.getElementById('submit').textContent = '保存笔记';
+    document.getElementById('cancelEdit').style.display = 'none';
+  }
+  render();
+}
+
+// 取消编辑
+function cancelEdit() {
+  editId = null;
+  document.getElementById('content').value = '';
+  document.getElementById('submit').textContent = '保存笔记';
+  document.getElementById('cancelEdit').style.display = 'none';
+}
+
+// 渲染标签云
+function renderTags() {
+  const list = loadData();
+  const tagCount = {};
+  list.forEach(item => {
+    item.tags.forEach(t => {
+      tagCount[t] = (tagCount[t] || 0) + 1;
+    });
+  });
+
+  const cloud = document.getElementById('tagsCloud');
+  cloud.innerHTML = '';
+
+  // 全部标签按钮
+  const allTag = document.createElement('span');
+  allTag.className = 'tag' + (currentTag === '' ? ' active' : '');
+  allTag.textContent = '全部笔记';
+  allTag.onclick = () => { currentTag = ''; render(); };
+  cloud.appendChild(allTag);
+
+  // 生成所有标签
+  Object.keys(tagCount).sort().forEach(tag => {
+    const tagEl = document.createElement('span');
+    tagEl.className = 'tag' + (currentTag === tag ? ' active' : '');
+    tagEl.textContent = `${tag} (${tagCount[tag]})`;
+    tagEl.onclick = () => { currentTag = tag; render(); };
+    cloud.appendChild(tagEl);
+  });
+}
+
+// 渲染笔记列表
+function renderList() {
+  const list = loadData();
+  const container = document.getElementById('memoList');
+  container.innerHTML = '';
+
+  // 按标签筛选
+  let filteredList = list;
+  if (currentTag) {
+    filteredList = list.filter(item => item.tags.includes(currentTag));
+  }
+
+  // 空状态
+  if (filteredList.length === 0) {
+    container.innerHTML = '<div class="empty">暂无笔记，写下你的第一条想法吧</div>';
+    return;
+  }
+
+  // 渲染单条笔记
+  filteredList.forEach(item => {
+    const memoEl = document.createElement('div');
+    memoEl.className = 'memo-item';
+    
+    // 时间显示（优先显示更新时间）
+    const timeText = item.updatedAt !== item.createdAt 
+      ? `${item.createdAt}（更新于 ${item.updatedAt}）` 
+      : item.createdAt;
+    
+    // 内容处理：高亮标签
+    let formatContent = item.content;
+    item.tags.forEach(tag => {
+      const reg = new RegExp(`#${tag}`, 'g');
+      formatContent = formatContent.replace(reg, `<span class="tag-span">#${tag}</span>`);
+    });
+
+    memoEl.innerHTML = `
+      <div class="memo-time">${timeText}</div>
+      <div class="memo-content">${formatContent}</div>
+      <div class="memo-actions">
+        <span onclick="editMemo(${item.id})">编辑</span>
+        <span onclick="deleteMemo(${item.id})">删除</span>
+      </div>
+    `;
+    container.appendChild(memoEl);
+  });
+}
+
+// 统一渲染入口
+function render() {
+  renderTags();
+  renderList();
+}
+
+// 导出备份
+function exportData() {
+  const data = localStorage.getItem(STORAGE_KEY) || '[]';
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `LocalMemo备份_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 导入备份
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (Array.isArray(data)) {
+          saveData(data);
+          render();
+          alert('备份导入成功！');
+        } else {
+          alert('备份格式错误，请选择正确的LocalMemo备份文件');
+        }
+      } catch (err) {
+        alert('文件解析失败，请检查文件是否损坏');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// 快捷键：Ctrl+Enter / Cmd+Enter 快速提交
+document.getElementById('content').addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    submitMemo();
+  }
+});
+
+// 绑定事件
+document.getElementById('submit').onclick = submitMemo;
+document.getElementById('export').onclick = exportData;
+document.getElementById('import').onclick = importData;
+document.getElementById('cancelEdit').onclick = cancelEdit;
+
+// 页面加载初始化
+render();
+</script>
+</body>
+</html>
