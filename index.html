@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LocalMemo - 离线浮墨</title>
+<title>LocalMemo 离线浮墨</title>
+<!-- PWA核心配置 -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#2D6A4F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="LocalMemo">
 <style>
 * {
   margin: 0;
@@ -21,6 +27,8 @@
   --flomo-text-secondary: #6B7280;
   --flomo-text-placeholder: #9CA3AF;
   --flomo-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --flomo-danger: #DC2626;
+  --flomo-success: #059669;
 }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
@@ -47,6 +55,7 @@ body {
 .btn-group {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 .btn {
   padding: 6px 12px;
@@ -62,6 +71,22 @@ body {
   background: var(--flomo-light-bg);
   color: var(--flomo-primary);
   border-color: var(--flomo-light-bg);
+}
+.btn-primary {
+  background: var(--flomo-primary);
+  color: white;
+  border-color: var(--flomo-primary);
+}
+.btn-primary:hover {
+  background: var(--flomo-primary-dark);
+  color: white;
+}
+.btn-danger {
+  border-color: #FECACA;
+  color: var(--flomo-danger);
+}
+.btn-danger:hover {
+  background: #FEE2E2;
 }
 .input-card {
   background: var(--flomo-card-bg);
@@ -86,8 +111,19 @@ body {
 }
 .submit-wrap {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 10px;
+}
+.sync-status {
+  font-size: 12px;
+  color: var(--flomo-text-secondary);
+}
+.sync-status.success {
+  color: var(--flomo-success);
+}
+.sync-status.error {
+  color: var(--flomo-danger);
 }
 #submit {
   padding: 8px 20px;
@@ -147,9 +183,30 @@ body {
 .memo-content {
   font-size: 15px;
   margin-bottom: 10px;
-  white-space: pre-wrap;
   word-break: break-word;
   color: var(--flomo-text-main);
+}
+/* 段落与引用块样式 */
+.memo-content p {
+  margin: 0 0 8px 0;
+}
+.memo-content p:last-child {
+  margin-bottom: 0;
+}
+.memo-content blockquote {
+  border-left: 3px solid var(--flomo-primary);
+  background: var(--flomo-light-bg);
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-radius: 4px;
+  color: var(--flomo-text-secondary);
+}
+.memo-content blockquote p {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+}
+.memo-content blockquote p:last-child {
+  margin-bottom: 0;
 }
 .memo-content .tag-span {
   color: var(--flomo-primary);
@@ -174,6 +231,96 @@ body {
   padding: 60px 0;
   font-size: 14px;
 }
+/* 同步设置弹窗 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  padding: 20px;
+}
+.modal-mask.show {
+  display: flex;
+}
+.modal-card {
+  background: var(--flomo-card-bg);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--flomo-primary);
+}
+.modal-close {
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--flomo-text-secondary);
+  line-height: 1;
+}
+.modal-close:hover {
+  color: var(--flomo-text-main);
+}
+.form-item {
+  margin-bottom: 16px;
+}
+.form-item label {
+  display: block;
+  font-size: 14px;
+  color: var(--flomo-text-main);
+  margin-bottom: 6px;
+}
+.form-item input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.form-item input:focus {
+  border-color: var(--flomo-primary);
+}
+.form-tips {
+  font-size: 12px;
+  color: var(--flomo-text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+/* 冲突弹窗 */
+.conflict-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.conflict-text {
+  font-size: 14px;
+  color: var(--flomo-text-main);
+  margin-bottom: 10px;
+}
 </style>
 </head>
 <body>
@@ -181,6 +328,7 @@ body {
 <div class="header">
   <h1>LocalMemo 离线浮墨</h1>
   <div class="btn-group">
+    <button class="btn" id="syncBtn">云同步设置</button>
     <button class="btn" id="export">导出备份</button>
     <button class="btn" id="import">导入备份</button>
     <button class="btn" id="cancelEdit" style="display: none;">取消编辑</button>
@@ -188,8 +336,9 @@ body {
 </div>
 
 <div class="input-card">
-<textarea id="content" placeholder="写下此刻的想法，用 #标签 自动分类…"></textarea>
+<textarea id="content" placeholder="写下此刻的想法，用 #标签 自动分类，点击笔记的「引用」按钮可续写…"></textarea>
 <div class="submit-wrap">
+  <div class="sync-status" id="syncStatus">未开启云同步</div>
   <button id="submit">保存笔记</button>
 </div>
 </div>
@@ -197,11 +346,127 @@ body {
 <div class="tags-cloud" id="tagsCloud"></div>
 <div class="memo-list" id="memoList"></div>
 
-<script>
-const STORAGE_KEY = 'localmemo_flomo_data';
-let currentTag = '';
-let editId = null; // 编辑状态标记
+<!-- 同步设置弹窗 -->
+<div class="modal-mask" id="syncModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>云同步设置（GitHub Gist）</h3>
+      <span class="modal-close" id="modalClose">×</span>
+    </div>
+    <div class="form-item">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="githubToken" placeholder="请输入仅开启gist权限的Token">
+      <p class="form-tips">Token仅存在本地浏览器，不会上传到任何服务器，最小权限仅勾选gist即可</p>
+    </div>
+    <div class="form-item">
+      <label>Gist ID</label>
+      <input type="text" id="gistId" placeholder="请输入用于同步的Gist ID">
+      <p class="form-tips">需创建Secret私密Gist，文件名建议为localmemo_sync.json</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="clearSyncConfig">清空配置</button>
+      <button class="btn btn-primary" id="saveSyncConfig">保存并开启同步</button>
+    </div>
+  </div>
+</div>
 
+<!-- 冲突处理弹窗 -->
+<div class="modal-mask" id="conflictModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>数据冲突提醒</h3>
+    </div>
+    <p class="conflict-text">检测到云端和本地数据均有更新，存在冲突，请选择要保留的版本：</p>
+    <div class="conflict-actions">
+      <button class="btn" id="keepLocal">保留本地版本（覆盖云端）</button>
+      <button class="btn btn-primary" id="keepCloud">保留云端版本（覆盖本地）</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 核心存储Key
+const STORAGE_KEY = 'localmemo_flomo_data';
+const SYNC_CONFIG_KEY = 'localmemo_sync_config';
+const LAST_SYNC_TIME_KEY = 'localmemo_last_sync_time';
+
+// 全局状态
+let currentTag = '';
+let editId = null;
+let syncLock = false; // 同步锁，避免重复请求
+let syncConfig = {
+  token: '',
+  gistId: ''
+};
+
+// ========== 新增：内容格式化核心函数（处理引用块、标签、XSS转义） ==========
+function formatContent(content) {
+  // 第一步：HTML转义，防止XSS攻击
+  let escaped = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+  
+  // 第二步：按行处理，转换引用块与段落
+  const lines = escaped.split('\n');
+  let html = '';
+  let inBlockquote = false;
+  
+  lines.forEach(line => {
+    const isQuoteLine = line.trimStart().startsWith('&gt;'); // 匹配转义后的>开头的引用行
+
+    if (isQuoteLine) {
+      if (!inBlockquote) {
+        html += '<blockquote>';
+        inBlockquote = true;
+      }
+      // 移除引用标记，保留内容
+      const lineContent = line.replace(/^&gt;\s?/, '');
+      html += `<p>${lineContent}</p>`;
+    } else {
+      if (inBlockquote) {
+        html += '</blockquote>';
+        inBlockquote = false;
+      }
+      // 普通行：非空内容加段落标签，空行加换行
+      html += line.trim() !== '' ? `<p>${line}</p>` : '<br>';
+    }
+  });
+
+  // 处理末尾未闭合的引用块
+  if (inBlockquote) html += '</blockquote>';
+
+  // 第三步：标签高亮处理
+  html = html.replace(/#([^\s#<>&]+)/g, '<span class="tag-span">#$1</span>');
+
+  return html;
+}
+
+// ========== 新增：引用功能核心函数 ==========
+function quoteMemo(id) {
+  const list = loadData();
+  const targetMemo = list.find(item => item.id === id);
+  if (!targetMemo) return;
+
+  // 重置编辑状态，避免冲突
+  editId = null;
+  document.getElementById('submit').textContent = '保存笔记';
+  document.getElementById('cancelEdit').style.display = 'none';
+
+  // 生成带溯源信息的引用内容，标准markdown格式
+  const quoteHeader = `> 【引用自 ${targetMemo.createdAt}】\n`;
+  const quoteContent = targetMemo.content.split('\n').map(line => `> ${line}`).join('\n');
+  const fullContent = quoteHeader + quoteContent + '\n\n';
+
+  // 回填到输入框，自动聚焦并滚动到顶部
+  const contentInput = document.getElementById('content');
+  contentInput.value = fullContent;
+  contentInput.focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ========== 原有核心功能（完全保留兼容） ==========
 // 加载本地数据
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -252,6 +517,8 @@ function submitMemo() {
   document.getElementById('content').value = '';
   document.getElementById('content').focus();
   render();
+  // 保存后自动同步到云端
+  autoSyncToCloud();
 }
 
 // 编辑笔记：回填内容到输入框
@@ -282,6 +549,8 @@ function deleteMemo(id) {
     document.getElementById('cancelEdit').style.display = 'none';
   }
   render();
+  // 删除后自动同步到云端
+  autoSyncToCloud();
 }
 
 // 取消编辑
@@ -350,18 +619,16 @@ function renderList() {
       ? `${item.createdAt}（更新于 ${item.updatedAt}）` 
       : item.createdAt;
     
-    // 内容处理：高亮标签
-    let formatContent = item.content;
-    item.tags.forEach(tag => {
-      const reg = new RegExp(`#${tag}`, 'g');
-      formatContent = formatContent.replace(reg, `<span class="tag-span">#${tag}</span>`);
-    });
+    // 内容格式化：处理引用块、标签高亮
+    const formatHtml = formatContent(item.content);
 
+    // 新增引用按钮，放在编辑与删除之间
     memoEl.innerHTML = `
       <div class="memo-time">${timeText}</div>
-      <div class="memo-content">${formatContent}</div>
+      <div class="memo-content">${formatHtml}</div>
       <div class="memo-actions">
         <span onclick="editMemo(${item.id})">编辑</span>
+        <span onclick="quoteMemo(${item.id})">引用</span>
         <span onclick="deleteMemo(${item.id})">删除</span>
       </div>
     `;
@@ -403,6 +670,8 @@ function importData() {
           saveData(data);
           render();
           alert('备份导入成功！');
+          // 导入后自动同步到云端
+          autoSyncToCloud();
         } else {
           alert('备份格式错误，请选择正确的LocalMemo备份文件');
         }
@@ -423,14 +692,292 @@ document.getElementById('content').addEventListener('keydown', (e) => {
   }
 });
 
-// 绑定事件
+// ========== 云同步核心功能（完全保留兼容） ==========
+// 加载同步配置
+function loadSyncConfig() {
+  const raw = localStorage.getItem(SYNC_CONFIG_KEY);
+  if (raw) {
+    try {
+      syncConfig = JSON.parse(raw);
+      updateSyncStatus('已开启云同步', 'success');
+      return true;
+    } catch (e) {
+      syncConfig = { token: '', gistId: '' };
+    }
+  }
+  updateSyncStatus('未开启云同步', '');
+  return false;
+}
+
+// 保存同步配置
+function saveSyncConfig() {
+  const token = document.getElementById('githubToken').value.trim();
+  const gistId = document.getElementById('gistId').value.trim();
+  
+  if (!token || !gistId) {
+    alert('请填写完整的Token和Gist ID');
+    return;
+  }
+
+  syncConfig = { token, gistId };
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(syncConfig));
+  closeSyncModal();
+  updateSyncStatus('同步配置已保存，正在连接...', 'success');
+  
+  // 保存后立即拉取云端数据
+  syncFromCloud();
+}
+
+// 清空同步配置
+function clearSyncConfig() {
+  if (!confirm('确定要清空同步配置吗？清空后将关闭云同步功能')) return;
+  syncConfig = { token: '', gistId: '' };
+  localStorage.removeItem(SYNC_CONFIG_KEY);
+  localStorage.removeItem(LAST_SYNC_TIME_KEY);
+  document.getElementById('githubToken').value = '';
+  document.getElementById('gistId').value = '';
+  closeSyncModal();
+  updateSyncStatus('未开启云同步', '');
+}
+
+// 更新同步状态显示
+function updateSyncStatus(text, type = '') {
+  const statusEl = document.getElementById('syncStatus');
+  statusEl.textContent = text;
+  statusEl.className = 'sync-status ' + type;
+}
+
+// 从云端拉取数据
+async function fetchCloudData() {
+  if (!syncConfig.token || !syncConfig.gistId) return null;
+  
+  try {
+    const response = await fetch(`https://api.github.com/gists/${syncConfig.gistId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `token ${syncConfig.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'LocalMemo'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`请求失败: ${response.status}`);
+    }
+
+    const gistData = await response.json();
+    // 获取第一个文件的内容
+    const fileName = Object.keys(gistData.files)[0];
+    const fileContent = gistData.files[fileName].content;
+    const syncData = JSON.parse(fileContent);
+    
+    return {
+      data: Array.isArray(syncData.data) ? syncData.data : [],
+      updatedAt: gistData.updated_at,
+      fileName
+    };
+  } catch (e) {
+    console.error('拉取云端数据失败', e);
+    updateSyncStatus(`同步失败: ${e.message}`, 'error');
+    return null;
+  }
+}
+
+// 上传数据到云端
+async function uploadToCloud(data) {
+  if (!syncConfig.token || !syncConfig.gistId || syncLock) return false;
+  
+  syncLock = true;
+  updateSyncStatus('正在同步到云端...', 'success');
+  
+  try {
+    const cloudInfo = await fetchCloudData();
+    if (!cloudInfo) {
+      syncLock = false;
+      return false;
+    }
+
+    const syncData = {
+      data: data,
+      lastSync: new Date().toISOString()
+    };
+
+    const response = await fetch(`https://api.github.com/gists/${syncConfig.gistId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `token ${syncConfig.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'LocalMemo'
+      },
+      body: JSON.stringify({
+        files: {
+          [cloudInfo.fileName]: {
+            content: JSON.stringify(syncData, null, 2)
+          }
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`上传失败: ${response.status}`);
+    }
+
+    const now = new Date().toISOString();
+    localStorage.setItem(LAST_SYNC_TIME_KEY, now);
+    updateSyncStatus(`最后同步: ${new Date().toLocaleString('zh-CN')}`, 'success');
+    syncLock = false;
+    return true;
+  } catch (e) {
+    console.error('上传云端数据失败', e);
+    updateSyncStatus(`同步失败: ${e.message}`, 'error');
+    syncLock = false;
+    return false;
+  }
+}
+
+// 冲突检测与处理
+async function checkConflict(cloudUpdatedAt) {
+  const lastSyncTime = localStorage.getItem(LAST_SYNC_TIME_KEY);
+  // 第一次同步，无冲突
+  if (!lastSyncTime) return false;
+  
+  // 云端更新时间晚于最后一次同步时间，说明云端有更新
+  const cloudIsNewer = new Date(cloudUpdatedAt) > new Date(lastSyncTime);
+  // 本地数据更新时间晚于最后一次同步时间，说明本地有更新
+  const localData = loadData();
+  const localLastUpdate = localData.length > 0 
+    ? new Date(localData[0].updatedAt).toISOString() 
+    : new Date(0).toISOString();
+  const localIsNewer = new Date(localLastUpdate) > new Date(lastSyncTime);
+
+  // 两边都有更新，存在冲突
+  return cloudIsNewer && localIsNewer;
+}
+
+// 从云端同步到本地
+async function syncFromCloud() {
+  if (!loadSyncConfig() || syncLock) return;
+  
+  syncLock = true;
+  updateSyncStatus('正在拉取云端数据...', 'success');
+  
+  const cloudResult = await fetchCloudData();
+  if (!cloudResult) {
+    syncLock = false;
+    return;
+  }
+
+  // 检测冲突
+  const hasConflict = await checkConflict(cloudResult.updatedAt);
+  if (hasConflict) {
+    syncLock = false;
+    showConflictModal(cloudResult.data);
+    return;
+  }
+
+  // 无冲突，直接用云端数据覆盖本地
+  saveData(cloudResult.data);
+  const now = new Date().toISOString();
+  localStorage.setItem(LAST_SYNC_TIME_KEY, now);
+  updateSyncStatus(`最后同步: ${new Date().toLocaleString('zh-CN')}`, 'success');
+  render();
+  syncLock = false;
+}
+
+// 自动同步到云端（操作后触发）
+async function autoSyncToCloud() {
+  if (!loadSyncConfig()) return;
+  const localData = loadData();
+  await uploadToCloud(localData);
+}
+
+// 冲突弹窗相关
+function showConflictModal(cloudData) {
+  const modal = document.getElementById('conflictModal');
+  modal.classList.add('show');
+
+  // 保留本地
+  document.getElementById('keepLocal').onclick = async () => {
+    const localData = loadData();
+    await uploadToCloud(localData);
+    modal.classList.remove('show');
+  };
+
+  // 保留云端
+  document.getElementById('keepCloud').onclick = () => {
+    saveData(cloudData);
+    const now = new Date().toISOString();
+    localStorage.setItem(LAST_SYNC_TIME_KEY, now);
+    render();
+    updateSyncStatus(`最后同步: ${new Date().toLocaleString('zh-CN')}`, 'success');
+    modal.classList.remove('show');
+    syncLock = false;
+  };
+}
+
+// 同步设置弹窗相关
+function openSyncModal() {
+  loadSyncConfig();
+  document.getElementById('githubToken').value = syncConfig.token;
+  document.getElementById('gistId').value = syncConfig.gistId;
+  document.getElementById('syncModal').classList.add('show');
+}
+
+function closeSyncModal() {
+  document.getElementById('syncModal').classList.remove('show');
+}
+
+// ========== PWA核心注册（完全保留兼容） ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(registration => {
+        console.log('LocalMemo PWA 注册成功', registration);
+      })
+      .catch(err => {
+        console.log('LocalMemo PWA 注册失败', err);
+      });
+  });
+}
+
+// ========== 事件绑定与初始化 ==========
+// 原有功能事件绑定
 document.getElementById('submit').onclick = submitMemo;
 document.getElementById('export').onclick = exportData;
 document.getElementById('import').onclick = importData;
 document.getElementById('cancelEdit').onclick = cancelEdit;
 
+// 同步功能事件绑定
+document.getElementById('syncBtn').onclick = openSyncModal;
+document.getElementById('modalClose').onclick = closeSyncModal;
+document.getElementById('saveSyncConfig').onclick = saveSyncConfig;
+document.getElementById('clearSyncConfig').onclick = clearSyncConfig;
+
+// 点击弹窗遮罩关闭
+document.getElementById('syncModal').onclick = (e) => {
+  if (e.target === document.getElementById('syncModal')) closeSyncModal();
+};
+
+// 页面获得焦点时，自动检查云端更新
+window.addEventListener('focus', () => {
+  if (loadSyncConfig()) {
+    syncFromCloud();
+  }
+});
+
 // 页面加载初始化
-render();
+window.onload = () => {
+  loadSyncConfig();
+  render();
+  // 开启同步的话，页面加载自动拉取云端数据
+  if (syncConfig.token && syncConfig.gistId) {
+    syncFromCloud();
+    // 每5分钟自动同步一次
+    setInterval(() => {
+      syncFromCloud();
+    }, 5 * 60 * 1000);
+  }
+};
 </script>
 </body>
 </html>
