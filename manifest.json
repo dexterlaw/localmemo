@@ -1,0 +1,25 @@
+{
+  "name": "LocalMemo 离线浮墨",
+  "short_name": "LocalMemo",
+  "description": "仿flomo的极简离线笔记工具，支持多设备云同步，可安装为本地应用",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F8F9F6",
+  "theme_color": "#2D6A4F",
+  "lang": "zh-CN",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyOCIgZmlsbD0iIzJENkE0RiIvPjxyZWN0IHg9IjEyOCIgeT0iMTI4IiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgcng9IjE2IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC45Ii8+PGxpbmUgeDE9IjE2MCIgeTE9IjE3NiIgeDI9IjM1MiIgeTI9IjE3NiIgc3Ryb2tlPSIjMkQ2QTRGIiBzdHJva2Utd2lkdGg9IjE2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48bGluZSB4MT0iMTYwIiB5MT0iMjQwIiB4Mj0iMzUyIiB5Mj0iMjQwIiBzdHJva2U9IiMyRDZBNEYiIHN0cm9rZS13aWR0aD0iMTYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxsaW5lIHgxPSIxNjAiIHkxPSIzMDQiIHgyPSIyODgiIHkyPSIzMDQiIHN0cm9rZT0iIzJENkE0RiIgc3Ryb2tlLXdpZHRoPSIxNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQ4IiBmaWxsPSIjMkQ2QTRGIi8+PHJlY3QgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSI4IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC45Ii8+PGxpbmUgeDE9IjYwIiB5MT0iNzIiIHgyPSIxMzIiIHkyPSI3MiIgc3Ryb2tlPSIjMkQ2QTRGIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxsaW5lIHgxPSI2MCIgeTE9Ijk2IiB4Mj0iMTMyIiB5Mj0iOTYiIHN0cm9rZT0iIzJENkE0RiIgc3Ryb2tlLXdpZHRoPSI4IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48bGluZSB4MT0iNjAiIHkxPSIxMjAiIHgyPSI5NiIgeTI9IjEyMCIgc3Ryb2tlPSIjMkQ2QTRGIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
